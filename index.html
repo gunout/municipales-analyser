@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO & PARTAGE RESEAUX SOCIAUX -->
+    <title>Analyseur Municipales 2026 - Résultats Officiels</title>
+    <meta name="description" content="Analysez les résultats du 1er tour des élections municipales 2026. Visualisation par commune, participation et tendances politiques.">
+    
+    <!-- Configuration Open Graph (Facebook, LinkedIn, WhatsApp) -->
+    <meta property="og:title" content="Analyseur Tactique Municipales 2026" />
+    <meta property="og:description" content="Explorez les résultats officiels du 1er tour des municipales. Outil gratuit et open-source." />
+    <meta property="og:type" content="website" />
+    
+    <!-- URL DU SITE EN LIGNE (GitHub Pages) -->
+    <meta property="og:url" content="https://gunout.github.io/Municipales_France_Analyseur_1er_Tour/" />
+    
+    <!-- IMAGE D'APERCU (Doit être uploadée dans votre dépôt) -->
+    <meta property="og:image" content="https://gunout.github.io/Municipales_France_Analyseur_1er_Tour/preview.png" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* PALETTE BLEU BLANC ROUGE — ÉTAT FRANÇAIS */
+            --bg-tactical: #0a1428;        /* bleu nuit profond */
+            --bg-panel: #0f1e38;            /* bleu institutionnel */
+            --grid-line: rgba(255, 255, 255, 0.06);
+            --bleu-france: #0055A4;         /* bleu drapeau */
+            --bleu-clair: #7f9fd0;
+            --blanc: #FFFFFF;
+            --rouge-marianne: #EF4135;      /* rouge drapeau */
+            --rouge-clair: #ff7b6b;
+            --neon-blue: #4a8fe0;           /* accent bleu lumineux */
+            --neon-red: #ff3b30;            /* accent rouge vif */
+            --neon-white: #f0f4fc;
+            --border-tech: 1px solid rgba(0, 85, 164, 0.6);
+            --border-tricolore: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-tactical);
+            color: var(--neon-white);
+            font-family: 'Share Tech Mono', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 5px;
+            background: linear-gradient(90deg, var(--bleu-france) 0%, var(--bleu-france) 33%, var(--blanc) 33%, var(--blanc) 66%, var(--rouge-marianne) 66%, var(--rouge-marianne) 100%);
+            box-shadow: 0 0 20px rgba(0, 85, 164, 0.6);
+            animation: scan 4s linear infinite;
+            z-index: 1000;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            border: var(--border-tech);
+            background: linear-gradient(135deg, rgba(10, 20, 40, 0.95) 0%, rgba(15, 30, 56, 0.95) 100%);
+            padding: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 95% 100%, 0 100%);
+            border-left: 5px solid var(--bleu-france);
+            border-right: 5px solid var(--rouge-marianne);
+        }
+
+        header .version-tag {
+            position: absolute;
+            top: 5px; right: 10px;
+            font-size: 0.7rem;
+            color: var(--bleu-clair);
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: white;
+            text-shadow: 0 0 12px rgba(0, 85, 164, 0.5);
+        }
+
+        h1 span { color: var(--bleu-clair); }
+
+        /* DOWNLOAD BUTTON */
+        .data-source {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-download {
+            display: inline-block;
+            padding: 8px 15px;
+            border: 1px solid var(--rouge-marianne);
+            color: var(--rouge-marianne);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            background: rgba(239, 65, 53, 0.08);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .btn-download:hover {
+            background: var(--rouge-marianne);
+            color: white;
+            box-shadow: 0 0 14px rgba(239, 65, 53, 0.6);
+        }
+        .data-source span { font-size: 0.8rem; color: var(--bleu-clair); }
+
+        .drop-zone {
+            border: 2px dashed var(--bleu-france);
+            background: rgba(0, 85, 164, 0.08);
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+        .drop-zone:hover { background: rgba(0, 85, 164, 0.15); border-color: var(--bleu-clair); }
+        .drop-zone.dragover { border-color: var(--rouge-marianne); background: rgba(239, 65, 53, 0.1); }
+        .drop-zone input { display: none; }
+        .drop-zone .icon { font-size: 40px; color: var(--bleu-clair); margin-bottom: 10px; display: block; font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
+        .drop-zone .text { font-size: 1.2rem; letter-spacing: 1px; color: var(--blanc); }
+        .file-name { margin-top: 15px; display: inline-block; background: var(--bg-panel); padding: 5px 15px; border: 1px solid var(--bleu-france); color: var(--bleu-clair); }
+
+        .stats-banner { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--bg-panel); border-left: 4px solid var(--bleu-france); padding: 15px; border-right: 1px solid rgba(255,255,255,0.06); }
+        .stat-card:nth-child(2) { border-left-color: var(--blanc); }
+        .stat-card:nth-child(3) { border-left-color: var(--rouge-marianne); }
+        .stat-card .label { display: block; font-size: 0.8rem; color: var(--bleu-clair); text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px; }
+        .stat-card .value { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--blanc); }
+
+        .controls { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-input { flex: 1; background: rgba(0,0,0,0.3); border: var(--border-tech); color: var(--bleu-clair); padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 1rem; }
+        .search-input::placeholder { color: rgba(127, 159, 208, 0.5); }
+        .search-input:focus { outline: none; box-shadow: 0 0 0 2px rgba(0, 85, 164, 0.4); border-color: var(--bleu-clair); }
+        
+        .sort-btn { background: transparent; border: 1px solid var(--bleu-france); color: var(--bleu-clair); padding: 0 20px; font-family: 'Orbitron', sans-serif; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
+        .sort-btn:hover { background: rgba(0, 85, 164, 0.2); color: white; border-color: var(--bleu-clair); }
+        
+        .communes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; max-height: 600px; overflow-y: auto; padding-right: 10px; }
+        .commune-card { background: rgba(15, 30, 56, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); padding: 15px; cursor: pointer; transition: 0.2s; position: relative; }
+        .commune-card:hover { border-color: var(--bleu-clair); background: rgba(0, 85, 164, 0.15); box-shadow: 0 0 12px rgba(0, 85, 164, 0.2); }
+        .commune-card h3 { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: white; margin-bottom: 5px; }
+        .commune-card .meta { font-size: 0.85rem; color: var(--bleu-clair); display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .tag { font-size: 0.7rem; padding: 2px 8px; border: 1px solid; text-transform: uppercase; letter-spacing: 0.5px; }
+        .tag-blue { border-color: var(--bleu-france); color: var(--bleu-clair); background: rgba(0, 85, 164, 0.15); }
+        .tag-red { border-color: var(--rouge-marianne); color: var(--rouge-clair); background: rgba(239, 65, 53, 0.1); }
+
+        .detail-view { display: none; margin-top: 40px; border-top: 2px solid var(--bleu-france); padding-top: 20px; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .detail-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .detail-header h2 { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; text-transform: uppercase; color: white; border-left: 5px solid var(--bleu-france); padding-left: 15px; }
+
+        .viz-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        @media (max-width: 900px) { .viz-grid { grid-template-columns: 1fr; } }
+
+        .chart-box { background: var(--bg-panel); border: var(--border-tech); padding: 20px; height: 400px; position: relative; }
+        .data-panel { background: var(--bg-panel); border: var(--border-tech); padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        
+        .data-row { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 0; }
+        .data-row.winner { border-left: 3px solid var(--rouge-marianne); background: rgba(239, 65, 53, 0.1); padding-left: 10px; }
+        .data-label { color: var(--bleu-clair); }
+        .data-val { font-weight: bold; color: white; }
+
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 0.9rem; }
+        .data-table th { text-align: left; color: var(--bleu-clair); border-bottom: 2px solid var(--bleu-france); padding: 10px; letter-spacing: 0.5px; }
+        .data-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .winner-row { background: rgba(239, 65, 53, 0.08); }
+        .winner-row td:first-child { color: var(--rouge-clair); font-weight: bold; }
+
+        .loading { text-align: center; padding: 50px; color: var(--bleu-clair); }
+        .spinner { width: 40px; height: 40px; border: 4px solid transparent; border-top-color: var(--bleu-france); border-right-color: var(--blanc); border-bottom-color: var(--rouge-marianne); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .error { color: var(--rouge-clair); background: rgba(239, 65, 53, 0.12); padding: 20px; border: 1px solid var(--rouge-marianne); margin-top: 20px; font-size: 0.9rem; border-left: 5px solid var(--rouge-marianne); }
+        
+        footer { margin-top: 40px; text-align: center; font-size: 0.8rem; color: var(--bleu-clair); border-top: 1px solid var(--border-tech); padding-top: 20px; }
+        footer span.bleu { color: var(--bleu-france); }
+        footer span.blanc { color: var(--blanc); }
+        footer span.rouge { color: var(--rouge-marianne); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="version-tag">SYSTEM://WIDE_BV_AGGREGATOR_V2.0 · RÉPUBLIQUE FRANÇAISE</div>
+            <h1>ANALYSEUR <span>MUNICIPALES 2026</span></h1>
+            
+            <div class="data-source">
+                <span>Source officielle :</span>
+                <a href="https://www.data.gouv.fr/datasets/elections-municipales-2026-resultats-du-premier-tour?resource_id=1428132c-ad5e-437e-a928-7c2a254e40eb" target="_blank" class="btn-download">
+                    Télécharger les données (data.gouv.fr)
+                </a>
+            </div>
+        </header>
+
+        <div class="drop-zone" id="dropZone">
+            <input type="file" id="fileInput" accept=".csv,.txt">
+            <span class="icon">LOAD_DATA</span>
+            <div class="text">GLISSEZ LE FICHIER CSV ICI</div>
+            <div class="file-name" id="fileName">AUCUN FICHIER SÉLECTIONNÉ</div>
+        </div>
+
+        <div id="loader" class="loading" style="display:none;">
+            <div class="spinner"></div>
+            <p>TRAITEMENT DES DONNÉES EN COURS...</p>
+            <p id="progress" style="font-size: 0.8rem; margin-top: 10px; opacity: 0.6;"></p>
+        </div>
+
+        <div id="errorBox" class="error" style="display:none;"></div>
+
+        <div id="dashboard" style="display:none;">
+            <div class="stats-banner" id="statsBanner"></div>
+
+            <div class="controls">
+                <input type="text" id="searchInput" class="search-input" placeholder="RECHERCHE COMMUNE / CODE...">
+                <select id="sortSelect" class="sort-btn">
+                    <option value="nom">TRI: NOM</option>
+                    <option value="inscrits">TRI: POPULATION</option>
+                    <option value="participation">TRI: PARTICIPATION</option>
+                </select>
+            </div>
+
+            <div class="communes-grid" id="grid"></div>
+        </div>
+
+        <div id="detail" class="detail-view">
+            <div class="detail-header">
+                <h2 id="detailTitle">NOM COMMUNE</h2>
+                <span id="detailMeta" style="color: var(--bleu-clair);">METADATA</span>
+            </div>
+
+            <div class="stats-banner" id="detailStats"></div>
+
+            <div class="viz-grid">
+                <div class="chart-box">
+                    <canvas id="mainChart"></canvas>
+                </div>
+                <div class="data-panel" id="analysisPanel"></div>
+            </div>
+
+            <table class="data-table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>LISTE</th>
+                        <th>NUANCE</th>
+                        <th>VOIX</th>
+                        <th>%</th>
+                        <th>STATUS</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <footer>
+            Application Open Source · Données : Ministère de l'Intérieur via data.gouv.fr<br>
+            <span class="bleu">BLEU</span> · <span class="blanc">BLANC</span> · <span class="rouge">ROUGE</span> — Compatible fichiers "Résultats par bureaux de vote" (Format Wide)
+        </footer>
+    </div>
+
+    <script>
+        const state = { communes: [], filtered: [], current: null, chart: null };
+        const $ = id => document.getElementById(id);
+        
+        // Listeners
+        $('dropZone').addEventListener('click', () => $('fileInput').click());
+        $('fileInput').addEventListener('change', handleFile);
+        $('searchInput').addEventListener('input', renderGrid);
+        $('sortSelect').addEventListener('change', renderGrid);
+
+        ['dragenter', 'dragover'].forEach(evt => {
+            $('dropZone').addEventListener(evt, e => { e.preventDefault(); $('dropZone').classList.add('dragover'); });
+        });
+        ['dragleave', 'drop'].forEach(evt => {
+            $('dropZone').addEventListener(evt, e => { e.preventDefault(); $('dropZone').classList.remove('dragover'); });
+        });
+        $('dropZone').addEventListener('drop', e => {
+            if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+        });
+
+        function handleFile(e) {
+            if(e.target.files[0]) processFile(e.target.files[0]);
+        }
+
+        function processFile(file) {
+            $('fileName').textContent = file.name;
+            $('loader').style.display = 'block';
+            $('dashboard').style.display = 'none';
+            $('errorBox').style.display = 'none';
+            
+            const reader = new FileReader();
+            reader.onload = e => parseCSV(e.target.result);
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        // --- PARSER FOR WIDE FORMAT (BV AGGREGATION) ---
+        function parseCSV(content) {
+            try {
+                if (content.charCodeAt(0) === 0xFEFF) content = content.slice(1);
+                
+                const lines = content.split('\n').filter(l => l.trim());
+                if (lines.length < 2) throw new Error("FICHIER VIDE");
+
+                const delimiter = lines[0].includes(';') ? ';' : (lines[0].includes('\t') ? '\t' : ',');
+                
+                const rawHeaders = splitLine(lines[0], delimiter);
+                const headers = rawHeaders.map(h => {
+                    return h.replace(/"/g, '').trim().toLowerCase()
+                            .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                });
+
+                const findCol = (keywords) => {
+                    for (let k of keywords) {
+                        let idx = headers.indexOf(k);
+                        if (idx !== -1) return idx;
+                        idx = headers.findIndex(h => h.includes(k));
+                        if (idx !== -1) return idx;
+                    }
+                    return -1;
+                };
+
+                const col = {
+                    codeCom: findCol(['code commune', 'codcom']),
+                    nomCom: findCol(['libelle commune', 'nom commune', 'libelle de la commune']),
+                    dep: findCol(['code departement', 'coddep']),
+                    inscrits: findCol(['inscrits']),
+                    votants: findCol(['votants']),
+                    exprimes: findCol(['exprimes']),
+                    blancs: findCol(['blancs']),
+                    nuls: findCol(['nuls'])
+                };
+
+                const listPattern = [];
+                const maxLists = 20; 
+                for (let i = 1; i <= maxLists; i++) {
+                    let nomIdx = headers.indexOf(`libelle de liste ${i}`);
+                    if (nomIdx === -1) nomIdx = headers.indexOf(`libelle abrege de liste ${i}`);
+                    
+                    const voixIdx = headers.indexOf(`voix ${i}`);
+                    const nuanceIdx = headers.indexOf(`nuance liste ${i}`);
+                    
+                    if (nomIdx !== -1 && voixIdx !== -1) {
+                        listPattern.push({ nom: nomIdx, voix: voixIdx, nuance: nuanceIdx });
+                    }
+                }
+                
+                console.log(`DETECTED ${listPattern.length} LIST COLUMNS`);
+
+                const map = new Map(); 
+
+                for (let i = 1; i < lines.length; i++) {
+                    if (i % 10000 === 0) $('progress').textContent = `Scan ligne ${i}/${lines.length} (Aggrégation BV)`;
+                    
+                    const cols = splitLine(lines[i], delimiter).map(c => c.replace(/"/g, '').trim());
+                    if (cols.length < 10) continue;
+
+                    const codeCom = cols[col.codeCom] || 'X';
+                    const dep = cols[col.dep] || 'XX';
+                    const key = `${dep}-${codeCom}`;
+
+                    if (!map.has(key)) {
+                        map.set(key, {
+                            info: {
+                                key, nom: cols[col.nomCom] || 'INCONNU', dep,
+                                inscrits: 0, votants: 0, abstentions: 0,
+                                exprimes: 0, blancs: 0, nuls: 0
+                            },
+                            lists: new Map()
+                        });
+                    }
+
+                    const entry = map.get(key);
+
+                    entry.info.inscrits += parseInt(cols[col.inscrits]) || 0;
+                    entry.info.votants += parseInt(cols[col.votants]) || 0;
+                    entry.info.exprimes += parseInt(cols[col.exprimes]) || 0;
+                    entry.info.blancs += parseInt(cols[col.blancs]) || 0;
+                    entry.info.nuls += parseInt(cols[col.nuls]) || 0;
+                    entry.info.abstentions = entry.info.inscrits - entry.info.votants;
+
+                    listPattern.forEach(p => {
+                        const nom = cols[p.nom];
+                        if (nom && nom.length > 0) {
+                            const voix = parseInt(cols[p.voix]) || 0;
+                            const nuance = p.nuance !== -1 ? cols[p.nuance] : '';
+                            
+                            if (!entry.lists.has(nom)) {
+                                entry.lists.set(nom, { nom: nom, nuance: nuance, voix: 0 });
+                            }
+                            entry.lists.get(nom).voix += voix;
+                            if (!entry.lists.get(nom).nuance && nuance) entry.lists.get(nom).nuance = nuance;
+                        }
+                    });
+                }
+
+                state.communes = Array.from(map.values()).map(entry => {
+                    const listArray = Array.from(entry.lists.values());
+                    return { ...entry.info, listes: listArray };
+                });
+
+                const tot = state.communes.reduce((a, c) => (a.i += c.inscrits, a.v += c.votants, a), { i: 0, v: 0 });
+                const rate = tot.i > 0 ? ((tot.v / tot.i) * 100).toFixed(1) : 0;
+
+                $('statsBanner').innerHTML = `
+                    <div class="stat-card"><span class="label">Communes</span><span class="value">${state.communes.length.toLocaleString()}</span></div>
+                    <div class="stat-card"><span class="label">Inscrits</span><span class="value">${tot.i.toLocaleString()}</span></div>
+                    <div class="stat-card"><span class="label">Participation</span><span class="value">${rate}%</span></div>
+                `;
+
+                $('loader').style.display = 'none';
+                $('dashboard').style.display = 'block';
+                renderGrid();
+
+            } catch (e) {
+                $('loader').style.display = 'none';
+                $('errorBox').style.display = 'block';
+                $('errorBox').innerHTML = e.message;
+                console.error(e);
+            }
+        }
+
+        function splitLine(text, delim) {
+            let res = [], curr = '', inQ = false;
+            for (let char of text) {
+                if (char === '"') inQ = !inQ;
+                else if (char === delim && !inQ) { res.push(curr); curr = ''; }
+                else curr += char;
+            }
+            res.push(curr);
+            return res;
+        }
+
+        function renderGrid() {
+            const s = $('searchInput').value.toLowerCase();
+            const sort = $('sortSelect').value;
+
+            state.filtered = state.communes.filter(c => 
+                c.nom.toLowerCase().includes(s) || c.key.includes(s) || c.dep.includes(s)
+            );
+
+            state.filtered.sort((a, b) => {
+                if (sort === 'inscrits') return b.inscrits - a.inscrits;
+                if (sort === 'participation') return (b.votants/b.inscrits) - (a.votants/a.inscrits);
+                return a.nom.localeCompare(b.nom);
+            });
+
+            $('grid').innerHTML = state.filtered.slice(0, 50).map(c => {
+                const part = c.inscrits > 0 ? ((c.votants / c.inscrits) * 100).toFixed(1) : 0;
+                return `
+                    <div class="commune-card" onclick="showDetail('${c.key}')">
+                        <h3>${c.nom}</h3>
+                        <div class="meta">
+                            <span>DEPT: ${c.dep}</span>
+                            <span>POP: ${c.inscrits.toLocaleString()}</span>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <span class="tag tag-blue">${part}% PART.</span>
+                            <span class="tag tag-red">${c.listes.length} LISTES</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.showDetail = function(key) {
+            const com = state.communes.find(c => c.key === key);
+            if (!com) return;
+            state.current = com;
+
+            $('detail').style.display = 'block';
+            $('detailTitle').textContent = com.nom;
+            $('detailMeta').textContent = `SECTOR: ${com.dep} // ID: ${com.key}`;
+
+            com.listes.sort((a, b) => b.voix - a.voix);
+            const totalV = com.exprimes || 1;
+            const part = com.inscrits > 0 ? ((com.votants / com.inscrits) * 100).toFixed(1) : 0;
+
+            $('detailStats').innerHTML = `
+                <div class="stat-card"><span class="label">PARTICIPATION</span><span class="value">${part}%</span></div>
+                <div class="stat-card"><span class="label">ABSTENTION</span><span class="value">${(100 - part).toFixed(1)}%</span></div>
+                <div class="stat-card"><span class="label">SUFFRAGES</span><span class="value">${com.exprimes.toLocaleString()}</span></div>
+            `;
+
+            const win = com.listes[0];
+            const sec = com.listes[1];
+            const gap = win && sec ? (((win.voix - sec.voix) / totalV) * 100).toFixed(1) : 'N/A';
+
+            $('analysisPanel').innerHTML = `
+                <h3 style="color:var(--bleu-clair); font-family:Orbitron; margin-bottom:10px; border-bottom: 1px solid var(--bleu-france); padding-bottom:8px;">ANALYSE RÉSULTAT</h3>
+                <div class="data-row winner">
+                    <span class="data-label">VAINQUEUR</span>
+                    <span class="data-val">${win ? win.nom : 'N/A'}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">NUANCE</span>
+                    <span class="data-val">${win ? win.nuance : '-'}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">SCORE</span>
+                    <span class="data-val">${win ? ((win.voix / totalV) * 100).toFixed(1) : 0}%</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">ECART 2EME</span>
+                    <span class="data-val">${gap} PTS</span>
+                </div>
+            `;
+
+            if (state.chart) state.chart.destroy();
+            const ctx = $('mainChart').getContext('2d');
+            const chartData = com.listes.slice(0, 6);
+            
+            state.chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.map(l => l.nom.length > 20 ? l.nom.substring(0, 20) + '...' : l.nom),
+                    datasets: [{
+                        label: 'VOIX',
+                        data: chartData.map(l => l.voix),
+                        backgroundColor: chartData.map((_, i) => i === 0 ? 'rgba(239, 65, 53, 0.85)' : 'rgba(0, 85, 164, 0.55)'),
+                        borderColor: chartData.map((_, i) => i === 0 ? '#EF4135' : '#0055A4'),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { ticks: { color: '#7f9fd0' }, grid: { color: 'rgba(255,255,255,0.08)' } },
+                        x: { ticks: { color: 'white', font: { family: 'Share Tech Mono' } }, grid: { display: false } }
+                    }
+                }
+            });
+
+            $('dataTable').querySelector('tbody').innerHTML = com.listes.map((l, i) => `
+                <tr class="${i === 0 ? 'winner-row' : ''}">
+                    <td>${l.nom}</td>
+                    <td>${l.nuance}</td>
+                    <td>${l.voix.toLocaleString()}</td>
+                    <td>${((l.voix / totalV) * 100).toFixed(1)}%</td>
+                    <td>${l.elus > 0 ? '<span style="color:var(--rouge-clair)">ÉLU</span>' : '-'}</td>
+                </tr>
+            `).join('');
+
+            $('detail').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
