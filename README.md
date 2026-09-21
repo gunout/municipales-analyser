@@ -42,7 +42,7 @@ Idéal pour :
 
 ## 🚀 Démo en ligne
 
-👉 **Accéder à l'application** : [https://gunout.github.io/Municipales_France_Analyseur_1er_Tour/](https://gunout.github.io/Municipales_France_Analyseur_1er_Tour/)
+👉 **Accéder à l'application** : [https://gunout.github.io/Municipales_France_Analyseur_1er_Tour/](https://github.com/gunout/municipales-analyser)
 
 ---
 
@@ -56,10 +56,10 @@ Aucun ! L'application fonctionne directement dans un navigateur moderne.
 
 ```bash
 # Cloner le dépôt
-git clone https://github.com/gunout/Municipales_France_Analyseur_1er_Tour.git
+git clone https://github.com/gunout/municipales-analyser.git
 
 # Accéder au dossier
-cd Municipales_France_Analyseur_1er_Tour
+cd municipales-analyser
 
 # Ouvrir le fichier dans un navigateur
 open index.html
