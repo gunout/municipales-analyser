@@ -42,7 +42,7 @@ Idéal pour :
 
 ## 🚀 Démo en ligne
 
-👉 **Accéder à l'application** : [https://gunout.github.io/municipales-analyser/](https://github.com/gunout/municipales-analyser)
+👉 **Accéder à l'application** : [https://gunout.github.io/municipales-analyser/](https://gunout.github.io/municipales-analyser)
 
 ---
 
