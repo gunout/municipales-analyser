@@ -23,6 +23,14 @@ Idéal pour :
 - 🏛️ Les collectivités territoriales
 - 👥 Les citoyens curieux
 
+## SCREENSHOTS 
+
+<img width="1358" height="1028" alt="Screenshot 2026-09-22 at 01-48-53 Analyseur Municipales 2026 - Résultats Officiels" src="https://github.com/user-attachments/assets/1abbee69-8ade-4ef8-b534-b6fa5f4056b2" />
+
+<img width="1358" height="1028" alt="Screenshot 2026-09-22 at 01-49-12 Analyseur Municipales 2026 - Résultats Officiels" src="https://github.com/user-attachments/assets/db258fb7-ed3f-4f5d-9052-8dfd4f463456" />
+
+<img width="1358" height="1859" alt="Screenshot 2026-09-22 at 01-49-37 Analyseur Municipales 2026 - Résultats Officiels" src="https://github.com/user-attachments/assets/fecc545d-3946-4921-994b-5b8dd7fa2af5" />
+
 ---
 
 ## ✨ Fonctionnalités
